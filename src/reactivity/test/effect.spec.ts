@@ -24,7 +24,7 @@ describe("effect", () => {
     // 在task 过程中 收集 
     // 在trigger 中 运行
     // 猜测在 effect 运行过程中 ，只是监听 并记录 运行 的fn 与 obj的关系
-    // effect(fn) 的返回值 是  fn 的返回值； effect(fn)  ==  fn()
+    // effect(fn) 的返回值 是 函数，函数运行后 是  fn 的返回值； effect(fn)()  ==  fn()
     it('return runner  when we call effect ', () => {
         // 1、 调用effect(fn) - 返回-> function(runner)
         // 2、调用 function(runner) 会再次执行 传给 effect内部的fn
