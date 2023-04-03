@@ -41,4 +41,44 @@ describe("effect", () => {
         expect(r).toBe('foo')
 
     })
+
+
+
+
+    // effect.sheduler 功能 调度器
+    // 在scheduler中主要通过三个队列实现任务调度，这三个对列分别为：
+    // pendingPreFlushCbs：组件更新前置任务队列
+    // queue：组件更新任务队列
+    // pendingPostFlushCbs：组件更新后置任务队列
+    it( 'scheduler', () => {
+        // 1. 通过effect的第二个参数给定一个 scheduler 的fn
+        // 2. effect第一次执行的时候 还 会执行fn
+        // 3. 当响应式对象 set update的时候不会执行fn 而是执行第二个参数 scheduler函数
+        // 4. 然后执行runner的时候，会再次执行 fn
+        let dummy
+        let run: any
+        // scheduler 是一个fn
+        const scheduler = jest.fn( () => {
+            run = runner
+        })
+        console.log('scheduler ==', scheduler);
+        
+        const obj = reactive( { foo: 1 } )
+        const runner = effect( () => {
+            dummy = obj.foo
+        }, { scheduler })
+        expect(scheduler).not.toHaveBeenCalled()
+        expect(dummy).toBe(1)
+        // should be called on first trigger
+        obj.foo++
+        expect(scheduler).toHaveBeenCalledTimes(1)
+        // should not run yet
+        expect(dummy).toBe(1)
+
+        // manually run 手动执行run
+        run()
+        // should have run
+        expect(dummy).toBe(2)
+        
+    })
 })

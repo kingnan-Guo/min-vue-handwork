@@ -1,10 +1,11 @@
 
 class ReactiveEffect {
     private _fn: any;
+    public scheduler: any;
     // public data:any;
-    constructor(fn){
+    constructor(fn, scheduler?){
         this._fn = fn
-        // this.data = 2
+        this.scheduler = scheduler
     }
     run(){
         activeEffect = this;
@@ -36,18 +37,28 @@ export function track(target, key) {
     // const dep = new Set();
     // dep.add(key, )
 }
+
+// set 过程中会出发trigger ，因为scheduler 是在 obj内部值改变的时候执行的，所以做了判断
+// 
 export function trigger(target, key) {
     let depsMap = targetMap.get(target)
     let dep = depsMap.get(key)
     for (const effect of dep) {
-        effect.run()
+        
+        
+        if (effect.scheduler) {
+            // console.log('effect ==',typeof(effect.scheduler) );
+            effect.scheduler()
+        } else {
+            effect.run()
+        }
     }
 }
 
 let activeEffect;  //存储 fn
-export function effect(fn) {
+export function effect(fn, options:any ={ }) {
     // fn
-    const _effect = new ReactiveEffect(fn)
+    const _effect = new ReactiveEffect(fn, options.scheduler)
     // 当调用 effect的时候 ，可以调用 fn
     _effect.run()
     // bind 修改 this 指针
