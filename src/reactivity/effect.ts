@@ -1,9 +1,13 @@
-
+import { extend } from "../shared";
 class ReactiveEffect {
     private _fn: any;
     public scheduler: any;
+    deps = [];
+    active = true;
+    onStop?:() => void;
+    // onStop = true;
     // public data:any;
-    constructor(fn, scheduler?){
+    constructor(fn, scheduler?: Function){
         this._fn = fn
         this.scheduler = scheduler
     }
@@ -11,7 +15,22 @@ class ReactiveEffect {
         activeEffect = this;
         return  this._fn()
     }
+    stop(){
+        if (this.active) {
+            cleanupEffect(this)
+            if(this.onStop){
+                this.onStop()
+            }
+            this.active = false
+        }
+    }
 }
+function cleanupEffect(effect) {
+    effect.deps.forEach((dep:any) => {
+        dep.delete(effect)
+    });
+}
+
 const targetMap = new Map()
 export function track(target, key) {
     // target -> key -> dep
@@ -33,7 +52,9 @@ export function track(target, key) {
     }
     dep.add(activeEffect)
 
-    // 
+    if (!activeEffect) return;
+    // 反向收集 所有的 dep
+    activeEffect.deps.push(dep)
     // const dep = new Set();
     // dep.add(key, )
 }
@@ -58,10 +79,32 @@ export function trigger(target, key) {
 let activeEffect;  //存储 fn
 export function effect(fn, options:any ={ }) {
     // fn
-    const _effect = new ReactiveEffect(fn, options.scheduler)
+    const _effect:any = new ReactiveEffect(fn, options.scheduler)
+    
+
+    // 是不是也可以使用  Reflect
+    // Object.assign(_effect, options)
+    // _effect.onStop = options.onStop;
+    extend(_effect, options)
+
     // 当调用 effect的时候 ，可以调用 fn
     _effect.run()
     // bind 修改 this 指针
-    return  _effect.run.bind(_effect)
+    var runner = _effect.run.bind(_effect)
+
+
+    
+    
+    
+    runner.effect = _effect
+    return runner;
 }
+
+
+
+export function stop(runner) {
+    // runner -> trager- > key  在 depMap中华清除
+    runner.effect.stop()
+}
+
 
