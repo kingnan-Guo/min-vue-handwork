@@ -5,17 +5,22 @@ describe("effect", () => {
         
         const user = reactive({
             age: 10,
+            num: 11
         })
         let nextAge:any;
+        let nextNum: any;
         // 依赖收集 fn
         effect(() => {
-            nextAge = user.age + 1
+            nextAge = user.age + 1;
+            nextNum = user.num
         })
 
         expect(nextAge).toBe(11)
         // upDate
         user.age++
         expect(nextAge).toBe(12)
+        user.num++
+        expect(nextNum).toBe(12)
     })
 
 
@@ -94,7 +99,12 @@ describe("effect", () => {
         obj.prop = 2
         expect(dummy).toBe(2)
         stop(runner)
-        obj.prop = 3
+        // obj.prop = 3
+        
+        // 因为触发了get 操作，所以导致了新的依赖收集，之前stop(runner)清除依赖，在新的get阶段被添加回去
+        // 所以正常情况下 dummy 不会等于 3 ，新一轮的依赖收集导致 dummy =3
+        obj.prop++; // obj.prop = obj.prop +1  get + set
+
         expect(dummy).toBe(2)
 
         // stopped effect should still be manually callable
