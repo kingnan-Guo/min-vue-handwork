@@ -1,4 +1,9 @@
 import { extend } from "../shared";
+
+
+let activeEffect;  //存储 fn
+let shouldTrack;
+
 class ReactiveEffect {
     private _fn: any;
     public scheduler: any;
@@ -12,8 +17,23 @@ class ReactiveEffect {
         this.scheduler = scheduler
     }
     run(){
+        // 收集依赖
+        // 使用 shouldTrack 来做区分
+        // 在没有使用 stop 之前 active = true
+        // 在使用 stop 之后，active  =false ，直接返回function，
+        // 不收集依赖，所以 activeEffect = this;写在了下面
+
+        if(!this.active){
+            return this._fn()
+        }
+        shouldTrack = true
         activeEffect = this;
-        return  this._fn()
+        // 执行fn 会执行 track 逻辑，因为 有时fn = () => { dummy = obj.prop }
+        const result = this._fn();
+
+        shouldTrack = false
+        
+        return  result
     }
     stop(){
         if (this.active) {
@@ -29,10 +49,20 @@ function cleanupEffect(effect) {
     effect.deps.forEach((dep:any) => {
         dep.delete(effect)
     });
+    effect.deps.length = 0
 }
 
 const targetMap = new Map()
 export function track(target, key) {
+
+    
+    // if(!activeEffect) return;
+    // if(!shouldTrack) return;
+    if (!isTracking()) return;
+
+
+
+
     // target -> key -> dep
     // 每一个对象 ‘target’ 对应一个 depsMap，
     // depsMap中存储了每一个key对应的dep
@@ -50,14 +80,22 @@ export function track(target, key) {
         dep = new Set();
         depsMap.set(key, dep)
     }
-    dep.add(activeEffect)
+    
 
-    if (!activeEffect) return;
+    if (dep.has(activeEffect)) return;
+
+    dep.add(activeEffect)
     // 反向收集 所有的 dep
     activeEffect.deps.push(dep)
     // const dep = new Set();
     // dep.add(key, )
 }
+
+
+function isTracking () {
+    return shouldTrack && activeEffect !== undefined
+}
+
 
 // set 过程中会出发trigger ，因为scheduler 是在 obj内部值改变的时候执行的，所以做了判断
 // 
@@ -76,7 +114,7 @@ export function trigger(target, key) {
     }
 }
 
-let activeEffect;  //存储 fn
+
 export function effect(fn, options:any ={ }) {
     // fn
     const _effect:any = new ReactiveEffect(fn, options.scheduler)

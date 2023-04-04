@@ -1,4 +1,4 @@
-import { readonly } from "../reactive";
+import { readonly, isReactive, isReadonly } from "../reactive";
 
 // readonly 不能被set 所以不会触发依赖；；
 describe("readonly", () => {
@@ -7,8 +7,8 @@ describe("readonly", () => {
       const wrapped = readonly(original);
       expect(wrapped).not.toBe(original);
     //   expect(isProxy(wrapped)).toBe(true);
-    //   expect(isReactive(wrapped)).toBe(false);
-    //   expect(isReadonly(wrapped)).toBe(true);
+      expect(isReactive(wrapped)).toBe(false);
+      expect(isReadonly(wrapped)).toBe(true);
     //   expect(isReactive(original)).toBe(false);
     //   expect(isReadonly(original)).toBe(false);
     //   expect(isReactive(wrapped.bar)).toBe(false);
