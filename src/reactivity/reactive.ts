@@ -24,6 +24,17 @@ import {  mutableHanders, readonlyHanders } from "./baseHandlers";
 //     })
 // }
 
+
+
+// ---------------------------------------
+
+
+export const enum ReactiveFlag  {
+    IS_REACTIVE = "__v_isReactive",
+    IS_READONLY = "__v_isReadonly"
+}
+
+
 export function reactive(raw) {
     // return new Proxy(raw, mutableHanders)
     return createActiveObject(raw, mutableHanders);
@@ -37,4 +48,18 @@ export function readonly(raw:any) {
 
 function createActiveObject(raw:any, baseHandlers) {
     return new Proxy(raw, baseHandlers)
+}
+
+export function isReactive(value) {
+    // 无论如何获取 value 内部的值 都会触发get
+    // 通过判断 readOnly 来判断 isReactive
+
+    //    return value['is_reactive']
+    //  !! 将 undefined 转换为 booble值
+   return !!value[ReactiveFlag.IS_REACTIVE]
+}
+
+
+export function isReadonly(value) {
+    return !!value[ReactiveFlag.IS_READONLY]
 }

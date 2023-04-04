@@ -1,14 +1,20 @@
 import { track, trigger } from "./effect";
-
+import { ReactiveFlag } from "./reactive";
 // 只在初始化的时候
 const get = createGetter()
 const set = creatSetter()
 const readonlyGet =  createGetter(true)
 function createGetter(readonly = false) {
     return function get(target, key, receiver){
-        console.log('reactive ==',target, key);
+        console.log('reactive = get =',target, key);
         // 获取对象身上某个属性的值，类似于 target[key]。如果没有该属性，则返回undefined。
         const res = Reflect.get(target, key, receiver)
+        if(key === ReactiveFlag.IS_REACTIVE){
+            return !readonly
+        }
+        else if (key === ReactiveFlag.IS_READONLY) {
+            return readonly
+        }
         if(!readonly){
             //toDo 在get阶段进行依赖收集 track
             track(target, key);
