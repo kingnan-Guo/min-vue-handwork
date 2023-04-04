@@ -1,5 +1,5 @@
 // import { track, trigger } from "./effect";
-import {  mutableHanders, readonlyHanders } from "./baseHandlers";
+import {  mutableHanders, readonlyHanders, shallowReadonlyHanders } from "./baseHandlers";
 
 // export function reactive(raw) {
 //     return new Proxy(raw, {
@@ -63,3 +63,9 @@ export function isReactive(value) {
 export function isReadonly(value) {
     return !!value[ReactiveFlag.IS_READONLY]
 }
+
+export function shallowReadonly(raw) {
+    return createActiveObject(raw, shallowReadonlyHanders);
+}
+
+
