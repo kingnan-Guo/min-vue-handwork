@@ -29,6 +29,7 @@ class ReactiveEffect {
         shouldTrack = true
         activeEffect = this;
         // 执行fn 会执行 track 逻辑，因为 有时fn = () => { dummy = obj.prop }
+        // 当fn执行完成之后  程序 才会继续往下走
         const result = this._fn();
 
         shouldTrack = false
@@ -81,18 +82,23 @@ export function track(target, key) {
         depsMap.set(key, dep)
     }
     
+    trackEffects(dep)
 
+
+}
+
+export function trackEffects(dep) {
     if (dep.has(activeEffect)) return;
 
     dep.add(activeEffect)
     // 反向收集 所有的 dep
     activeEffect.deps.push(dep)
-    // const dep = new Set();
-    // dep.add(key, )
+
+
 }
 
-
-function isTracking () {
+// 判断是否 可以收集到 track 中
+export function isTracking () {
     return shouldTrack && activeEffect !== undefined
 }
 
@@ -102,8 +108,12 @@ function isTracking () {
 export function trigger(target, key) {
     let depsMap = targetMap.get(target)
     let dep = depsMap.get(key)
+    triggerEffects(dep)
+}
+
+
+export function triggerEffects(dep) {
     for (const effect of dep) {
-        
         
         if (effect.scheduler) {
             // console.log('effect ==',typeof(effect.scheduler) );
@@ -130,10 +140,7 @@ export function effect(fn, options:any ={ }) {
     // bind 修改 this 指针
     var runner = _effect.run.bind(_effect)
 
-
-    
-    
-    
+    // 补充注释 ： 收集 ReactiveEffect 到runner 中返回
     runner.effect = _effect
     return runner;
 }
