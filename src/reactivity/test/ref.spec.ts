@@ -1,5 +1,5 @@
 import { effect } from "../effect";
-import { ref, isRef, unRef} from "../ref";
+import { ref, isRef, unRef, proxyRefs} from "../ref";
 import { reactive } from "../reactive";
 describe("ref", () => {
   it('ref path', () => {
@@ -42,25 +42,7 @@ describe("ref", () => {
       expect(dummy).toBe(2);
     });
   
-  //   it("proxyRefs", () => {
-  //     const user = {
-  //       age: ref(10),
-  //       name: "xiaohong",
-  //     };
-  //     const proxyUser = proxyRefs(user);
-  //     expect(user.age.value).toBe(10);
-  //     expect(proxyUser.age).toBe(10);
-  //     expect(proxyUser.name).toBe("xiaohong");
-  
-  //     (proxyUser as any).age = 20;
-  //     expect(proxyUser.age).toBe(20);
-  //     expect(user.age.value).toBe(20);
-  
-  //     proxyUser.age = ref(10);
-  //     expect(proxyUser.age).toBe(10);
-  //     expect(user.age.value).toBe(10);
-  //   });
-  
+
 
   // 判断是否为 ref 类型
     it("isRef", () => {
@@ -80,6 +62,38 @@ describe("ref", () => {
       expect(unRef(a)).toBe(1);
       expect(unRef(1)).toBe(1);
     });
+
+
+
+    // -------------------
+    // 使用场景 vue3
+    // template 中使用 ref.value
+    // setUp {return {ref} }
+
+    // 功能分析
+    // get ->age(ref) 那么就返回 .value
+    // not ref  返回ref值
+    it("proxyRefs", () => {
+      const user = {
+        age: ref(10),
+        name: "xiaohong",
+      };
+      const proxyUser = proxyRefs(user);
+      expect(user.age.value).toBe(10);
+      expect(proxyUser.age).toBe(10);
+      expect(proxyUser.name).toBe("xiaohong");
+  
+      (proxyUser as any).age = 20;
+      expect(proxyUser.age).toBe(20);
+      expect(user.age.value).toBe(20);
+  
+      proxyUser.age = ref(10);
+      expect(proxyUser.age).toBe(10);
+      expect(user.age.value).toBe(10);
+    });
+  
+
+
 
 
 
