@@ -31,7 +31,8 @@ import {  mutableHanders, readonlyHanders, shallowReadonlyHanders } from "./base
 
 export const enum ReactiveFlag  {
     IS_REACTIVE = "__v_isReactive",
-    IS_READONLY = "__v_isReadonly"
+    IS_READONLY = "__v_isReadonly",
+    // IS_PROXY = "__v_isProxy",
 }
 
 
@@ -64,8 +65,13 @@ export function isReadonly(value) {
     return !!value[ReactiveFlag.IS_READONLY]
 }
 
+
 export function shallowReadonly(raw) {
     return createActiveObject(raw, shallowReadonlyHanders);
 }
 
+// 判断 是否是  isProxy 只需判断 isReactive isReadonly
+export function isProxy(value) {
+    return isReactive(value) || isReadonly(value)
+}
 

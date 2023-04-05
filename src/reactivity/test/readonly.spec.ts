@@ -1,4 +1,4 @@
-import { readonly, isReactive, isReadonly } from "../reactive";
+import { readonly, isReactive, isReadonly, isProxy } from "../reactive";
 
 // readonly 不能被set 所以不会触发依赖；；
 describe("readonly", () => {
@@ -17,6 +17,7 @@ describe("readonly", () => {
     //   expect(isReadonly(original.bar)).toBe(false);
       // get
     //   expect(wrapped.foo).toBe(1);
+      expect(isProxy(wrapped)).toBe(true);
     });
 
     it('warn then call set', () => {

@@ -1,4 +1,4 @@
-import { isReactive, reactive } from "../reactive";
+import { isReactive, reactive, isProxy } from "../reactive";
 describe('reactive', () => {
     it('reactive one path', () => {
         const original = { foo: 1 };
@@ -6,8 +6,10 @@ describe('reactive', () => {
         console.log("observed == 000", observed, "original ==", original, "reactive==", reactive);
         expect(observed).not.toBe(original);
         expect(observed.foo).toBe(1);
+
+        expect(isProxy(observed)).toBe(true);
     })
-    
+
     // 嵌套 判定 是否返回 reactive
     it('nested reactive', () => {
         const original = {
