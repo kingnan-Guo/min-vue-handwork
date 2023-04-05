@@ -4,7 +4,7 @@ import { extend } from "../shared";
 let activeEffect;  //存储 fn
 let shouldTrack;
 
-class ReactiveEffect {
+export class ReactiveEffect {
     private _fn: any;
     public scheduler: any;
     deps = [];
