@@ -15,11 +15,11 @@ export function render(vnode,container) {
  * @param container 容器
  * 步骤
  * 1、去处理组件 processComponet
- * 
+ * 2、判断是不是 element 类型
  */
 function patch(vnode, container) {
 
-    
+
     // 判断是不是 element 类型
     processComponet(vnode, container)
 }
@@ -44,7 +44,7 @@ function setupRenderEffect(instance, container) {
     // 调用 render 函数
     // subTree 是虚拟节点树
     const subTree = instance.render()
-    // 基于  return 出来的 vnode 去调用  patch
+    // 基于  render（）  return 出来的 vnode 去调用  patch
     // vnode 是 element ，将 element 处理 挂载出来 ，进行 mounElement 处理
 
     // patch 这里是 递归循环调用 ，但现在不知到如何跳出循环
