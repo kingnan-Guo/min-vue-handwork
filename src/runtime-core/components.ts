@@ -40,18 +40,19 @@ export function setupComponent(instance) {
  * 
  */
 function setupStatefulComponet(instance: any) {
+    console.log("setupStatefulComponet =instance =", instance);
     
     // Component: 当前组件的 对象
     const Component = instance.type
-    const {setup} = Component;
-    if (setup) {
+    const {setUp} = Component;
+    if (setUp) {
         /**
          * 这里有两种返回值
          * 1、function 就任务是组件的 render 函数
          * 2、object ： 就会把object返回的对象 注入到 上下文中
          */
 
-        const setupResult = setup()
+        const setupResult = setUp()
         handleSetupResult(instance, setupResult)
     }
 }
@@ -84,11 +85,11 @@ function handleSetupResult(instance, setupResult:any) {
  * 因为 render 函数才会返回要渲染的 组件的节点
  */
 function finishComponentSetup(instance:any) {
+    console.log("finishComponentSetup == instance ==", instance);
+    
     const Component = instance.type
     if (Component.render) {
         instance.render = Component.render
     }
 }
-
-
 
