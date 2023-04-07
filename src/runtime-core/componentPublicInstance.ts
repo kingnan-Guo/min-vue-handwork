@@ -11,14 +11,16 @@ export const PublicIntanceProxyHandlers = {
         if (key in setUpState) {
             return setUpState[key]
         }
+
+
+        // 1、 ------
         // 使用 $el 方式 获取 setUp中的  数据
         // 因为 instance.vnode.el 组件实例中
         // if (key == "$el") {
         //     return instance.vnode.el
         // }
 
-
-        // --------
+        // 2、--------
         const publicGetter = publicPropertiesMap[key]
         if (publicGetter) {
             return publicGetter(instance)
