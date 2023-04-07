@@ -8,7 +8,7 @@ export function createComponetInstance(vnode) {
         vnode,
         type: vnode.type,
         setUpState: {},
-        el: null
+        // el: null
     }
     return component
 }

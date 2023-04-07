@@ -1,5 +1,6 @@
 import { isObject } from "../shared/index";
 import { createComponetInstance, setupComponent } from "./components";
+import { ShapeFlags } from "../shared/ShapeFlags";
 /**
  * 
  * @param vnode 虚拟节点
@@ -19,14 +20,24 @@ export function render(vnode,container) {
  * 2、判断是不是 element 类型
  */
 function patch(vnode, container) {
+    // ShapeFlags 可以标识vnode -> flag 
+    // ShapeFlags/ element -> string
+    // ShapeFlags/ object -> STATEFUL_COMPONENT
+
+
+
+
     // 判断 vnode 是不是 element 类型
     // 如果是 element  processElement
     //
     // typeof(vnode.type) =string
-    console.log("typeof(vnode.type) ==", typeof(vnode.type));
-    if (typeof vnode.type == 'string') {
+    // console.log("typeof(vnode.type) ==", typeof(vnode.type));
+    const { shapeFlags } = vnode
+    console.log("shapeFlags ==", shapeFlags, 'ShapeFlags ==', (shapeFlags & ShapeFlags.ELEMENT));
+    
+    if (shapeFlags & ShapeFlags.ELEMENT) { //if (typeof(vnode.type) ===string)
         processElement(vnode, container)
-    } else if(isObject(vnode.type)) {
+    } else if(shapeFlags & ShapeFlags.STATEFUL_COMPONENT) { // else if(isObject(vnode.type))
         // 如果是 component processComponet
         // typeof(vnode.type) = object
         processComponet(vnode, container)
@@ -59,15 +70,22 @@ function processComponet(vnode: any, container: any) {
  * @param container 
  */
 function mountElement(vnode, container) {
-    const {type, props, children} = vnode;
+    const {type, props, children, shapeFlags} = vnode;
+    console.log("mountElement =vnode=", vnode, type);
     // 为了使用 $el 使用 vnode 储存 el， 之后调用  subTree.el 取出存储的 根DOM 
     const el = (vnode.el = document.createElement(vnode.type))
+    
+    
     // 首先区分
     console.log("typeof(children) ==", typeof(children), 'children ==', children);
-    if (typeof children == "string") {
+    // children
+    if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {// ShapeFlags/ text_children // if (typeof children == "string") 
+        
         el.textContent = children
 
-    } else if (Array.isArray(children)) {
+    } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {// ShapeFlags/ Array_children // else if (Array.isArray(children))
+        
+
         //  每一个children 内部都是 一个虚拟节点vnode ，每一次都要判断是 element 还是 components
         // children.forEach((vn) => {
         //     patch(vn, el)
@@ -85,7 +103,7 @@ function mountElement(vnode, container) {
 
 /**
  * 处理 children 
- * @param vnode 虚拟节点vnode 内部存在 children<array> 循环🏪数组 
+ * @param vnode 虚拟节点vnode 内部存在 children<array> 循环遍历数组 
  * @param container 容器
  * 
  * 每一个children 内部都是 一个虚拟节点vnode ，每一次都要判断是 element 还是 components
