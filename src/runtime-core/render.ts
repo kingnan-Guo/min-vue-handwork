@@ -60,7 +60,8 @@ function processComponet(vnode: any, container: any) {
  */
 function mountElement(vnode, container) {
     const {type, props, children} = vnode;
-    const el = document.createElement(vnode.type)
+    // 为了使用 $el 使用 vnode 储存 el， 之后调用  subTree.el 取出存储的 根DOM 
+    const el = (vnode.el = document.createElement(vnode.type))
     // 首先区分
     console.log("typeof(children) ==", typeof(children), 'children ==', children);
     if (typeof children == "string") {
@@ -104,21 +105,33 @@ function mountComponet(vnode: any, container: any) {
     const instance = createComponetInstance(vnode)
     setupComponent(instance) //这里 处理 instance 并将 render 赋值给 instance 
     
-    setupRenderEffect(instance, container)
+    setupRenderEffect( instance, vnode, container)
 }
 // 
-function setupRenderEffect(instance, container) {
+function setupRenderEffect(instance, vnode, container) {
     console.log("setupRenderEffect  instance =", instance);
-    
+    // 通过 instance 返回 proxy 代理对象
+    const { proxy } = instance 
+
+
     // 调用 render 函数
     // subTree 是虚拟节点树
-    const subTree = instance.render()
+    // const subTree = instance.render()
+    const subTree = instance.render.call(proxy)
     // 基于  render() return 出来的 vnode 去调用  patch
     // vnode 是 element ，将 element 处理 挂载出来 ，进行 mounElement 处理
 
     // patch 这里是 递归循环调用 ，但现在不知到如何跳出循环
     patch(subTree, container)
 
+
+    //储存 elemet 要在 所有的 mount 完成 之后
+    // subTree.el 就是虚拟节点的 跟节点 ，
+    // subTree.el 是在 mountElement 中的 vnode.el 存储的
+    // 因为此处的  vnode  并非 是 mountElement 中的vnode ，而是被proxy 挂载的 vnode
+    console.log("setupRenderEffect subTree ==", subTree);
+    
+    vnode.el = subTree.el
 }
 
 

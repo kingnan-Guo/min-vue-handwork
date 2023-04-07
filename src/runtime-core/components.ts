@@ -1,4 +1,4 @@
-
+import { PublicIntanceProxyHandlers } from "./componentPublicInstance";
 /**
  * @param vnode 虚拟节点
  * 创建组件实例 
@@ -6,7 +6,9 @@
 export function createComponetInstance(vnode) {
     const component = {
         vnode,
-        type: vnode.type
+        type: vnode.type,
+        setUpState: {},
+        el: null
     }
     return component
 }
@@ -23,6 +25,28 @@ export function createComponetInstance(vnode) {
 export function setupComponent(instance) {
     // initProps()
     // initSlots()
+    console.log('setupComponent ==instance =', instance);
+    
+    // 通过代理的方式 访问 setUp
+    instance.proxy = new Proxy({_:instance},
+        PublicIntanceProxyHandlers
+        // {
+        //     get(target, key){
+        //         console.log("setupComponent instance =", instance);
+                
+        //         // setUpState
+        //         const { setUpState } = instance
+        //         if (key in setUpState) {
+        //             return setUpState[key]
+        //         }
+        //         // 使用 $el 方式 获取 setUp中的  数据
+        //         // 因为 instance.vnode.el 组件实例中
+        //         if (key == "$el") {
+        //             return instance.vnode.el
+        //         }
+        //     },
+        // }
+    ); 
 
     // 初始化有状态的 component 组件 ； 函数组件没有任何状态
     setupStatefulComponet(instance)
@@ -68,7 +92,7 @@ function setupStatefulComponet(instance: any) {
  */ 
 function handleSetupResult(instance, setupResult:any) {
     if (typeof setupResult == "object") {
-        instance.setupState = setupResult
+        instance.setUpState = setupResult
     }
     finishComponentSetup(instance)
 }
