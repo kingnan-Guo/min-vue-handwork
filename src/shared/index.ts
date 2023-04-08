@@ -11,3 +11,6 @@ export const hasChange = (val, newValue) => {
     return !Object.is(val, newValue)
 }
 
+// 判断 vaule 中是否包含  key
+export const hasOwn = (val, key) => Object.prototype.hasOwnProperty.call(val, key)
+

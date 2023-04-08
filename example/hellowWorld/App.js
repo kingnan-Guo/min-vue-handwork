@@ -1,4 +1,5 @@
 import { h } from "../../lib/mini-vue-handwork.esm.js";
+import { foo } from "./foo.js";
 
 //  测试数据  window.self = null;   window.self =this;
 window.self = null;
@@ -6,7 +7,7 @@ window.self = null;
 export const App = {
 
 
-
+    name: "App",
     // vue
     // <template></template> //有编译能力才能使用; template 会被编译成 render 函数 
     // render 函数
@@ -28,15 +29,18 @@ export const App = {
                 h("p", {class: 'blue'}, [
                     h("span", {class: ''}, 'p-three'),
                     h("p", {class: 'yellow', onClick(){console.log("onClick")}}, 
-                    // setUpState 方式 获取 msg
-                    // 1、猜测 因为将 setUpState 通过代理 挂载到 instance 中，所以使用 this可以访问到 msg 
+                    // setupState 方式 获取 msg
+                    // 1、猜测 因为将 setupState 通过代理 挂载到 instance 中，所以使用 this可以访问到 msg 
                     'p-four-'+this.msg ),
 
                     h("p", {class: 'green', onMouseenter(){console.log("onMouseenter")}}, 
                     // $el 方式 获取 msg
                     // this.$el -> get root element  (通过 el获取到 根element 的DOM 实例)
                     'p-five-'+this.msg2 )
-                ])
+                ]),
+                h(foo, {
+                    count: 7
+                }),
             ]
         );
     },

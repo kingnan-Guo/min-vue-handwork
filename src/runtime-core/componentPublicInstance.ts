@@ -1,3 +1,5 @@
+import { hasOwn } from "../shared/index";
+
 export const publicPropertiesMap = {
     $el:(i) => i.vnode.el
 }
@@ -6,10 +8,18 @@ export const PublicIntanceProxyHandlers = {
     get({_: instance}, key){
         console.log("setupComponent PublicIntanceProxyHandlers instance =", instance);
         
-        // setUpState
-        const { setUpState } = instance
-        if (key in setUpState) {
-            return setUpState[key]
+        // setupState
+        const { setupState, props } = instance
+        // if (key in setupState) {
+        //     return setupState[key]
+        // }
+        // const hasOwn = (val, key) => Object.prototype.hasOwnProperty.call(val, key)
+        // 检测当前这个 key  是否在 setupState 对象上
+        if (hasOwn(setupState, key)) {
+            return setupState[key]
+        } else if(hasOwn(props, key)){
+            // 此处的 获取 props 是通过 proxy代理  获取的 
+            return props[key]
         }
 
 

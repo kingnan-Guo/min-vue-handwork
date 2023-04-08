@@ -1,4 +1,7 @@
 import { PublicIntanceProxyHandlers } from "./componentPublicInstance";
+import { initProps } from "./componentProps";
+
+import { shallowReadonly } from "../reactivity/reactive";
 /**
  * @param vnode 虚拟节点
  * 创建组件实例 
@@ -7,7 +10,8 @@ export function createComponetInstance(vnode) {
     const component = {
         vnode,
         type: vnode.type,
-        setUpState: {},
+        setupState: {},
+        props: {}
         // el: null
     }
     return component
@@ -34,10 +38,10 @@ export function setupComponent(instance) {
         //     get(target, key){
         //         console.log("setupComponent instance =", instance);
                 
-        //         // setUpState
-        //         const { setUpState } = instance
-        //         if (key in setUpState) {
-        //             return setUpState[key]
+        //         // setupState
+        //         const { setupState } = instance
+        //         if (key in setupState) {
+        //             return setupState[key]
         //         }
         //         // 使用 $el 方式 获取 setUp中的  数据
         //         // 因为 instance.vnode.el 组件实例中
@@ -46,7 +50,11 @@ export function setupComponent(instance) {
         //         }
         //     },
         // }
-    ); 
+    );
+
+    // 初始化 props
+    // 在 setupStatefulComponet 中的  setup 中 使用 setup(instance.props) 传值
+    initProps(instance, instance.vnode.props)
 
     // 初始化有状态的 component 组件 ； 函数组件没有任何状态
     setupStatefulComponet(instance)
@@ -76,7 +84,12 @@ function setupStatefulComponet(instance: any) {
          * 2、object ： 就会把object返回的对象 注入到 上下文中
          */
 
-        const setupResult = setup()
+        /**
+         * 使用 setup(instance.props) 传值props 给组件
+         * const setupResult = setup(instance.props)
+         * 
+         */
+        const setupResult = setup(shallowReadonly(instance.props))
         handleSetupResult(instance, setupResult)
     }
 }
@@ -92,7 +105,7 @@ function setupStatefulComponet(instance: any) {
  */ 
 function handleSetupResult(instance, setupResult:any) {
     if (typeof setupResult == "object") {
-        instance.setUpState = setupResult
+        instance.setupState = setupResult
     }
     finishComponentSetup(instance)
 }
