@@ -19,7 +19,10 @@ export const foo = {
         }
 
         return {
-            emitAdd
+            emitAdd,
+            exampleData:{
+                data:1
+            }
         }
 
     },
