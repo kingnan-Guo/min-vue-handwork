@@ -87,6 +87,14 @@ function setupStatefulComponet(instance: any) {
     const {setup} = Component;
     if (setup) {
         /**
+         * currentInstance = instance = component 
+         * 这里是获取 Component 的值存入到全局变量中，
+         * 用来在  getCurrentInstance 中获取 Component 
+         */
+        currentInstance = instance
+
+
+        /**
          * 这里有两种返回值
          * 1、function 就任务是组件的 render 函数
          * 2、object ： 就会把object返回的对象 注入到 上下文中
@@ -98,6 +106,14 @@ function setupStatefulComponet(instance: any) {
          * 
          */
         const setupResult = setup(shallowReadonly(instance.props), {emit: instance.emit})
+
+        /**
+         * 插一句
+         * 清除掉 currentInstance 的值
+         * 因为在此时 setup 内的 getCurrentInstance 已经获取完成
+         */
+        currentInstance = null
+
         handleSetupResult(instance, setupResult)
     }
 }
@@ -138,3 +154,17 @@ function finishComponentSetup(instance:any) {
     }
 }
 
+
+/**
+ * currentInstance 后续在setup 中赋值
+ * 
+ * getCurrentInstance 目的是 获取 component  也就是 instance
+ * 
+ * 因为在 app 组件中获取 是 app.js 的实例对象
+ * 在 foo.js 获取 是 foo.js 的实例对象 所以 要在各自 的setup 中去获取
+ * 
+ */
+let currentInstance = null;
+export function getCurrentInstance() {
+    return currentInstance;
+}
