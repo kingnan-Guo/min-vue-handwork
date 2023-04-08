@@ -68,15 +68,15 @@ function setupStatefulComponet(instance: any) {
     
     // Component: 当前组件的 对象
     const Component = instance.type
-    const {setUp} = Component;
-    if (setUp) {
+    const {setup} = Component;
+    if (setup) {
         /**
          * 这里有两种返回值
          * 1、function 就任务是组件的 render 函数
          * 2、object ： 就会把object返回的对象 注入到 上下文中
          */
 
-        const setupResult = setUp()
+        const setupResult = setup()
         handleSetupResult(instance, setupResult)
     }
 }
