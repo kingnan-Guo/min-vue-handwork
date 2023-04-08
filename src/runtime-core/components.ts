@@ -1,6 +1,7 @@
 import { PublicIntanceProxyHandlers } from "./componentPublicInstance";
 import { emit } from "./componentEmit";
 import { initProps } from "./componentProps";
+import { initSlots } from "./componentSlots";
 
 import { shallowReadonly } from "../reactivity/reactive";
 /**
@@ -11,9 +12,10 @@ export function createComponetInstance(vnode) {
     const component = {
         vnode,
         type: vnode.type,
-        setupState: {},
-        props: {},
-        emit: () => {}
+        setupState: {},//储存 setup 的返回 的 值
+        props: {},//传给子组件的数据  shallowReadony
+        slots:{},// 插槽
+        emit: () => {}// 传给父组件的值
         // el: null
     }
     // 使用bind 传值 将component 作为 "第一个参数" 传给 emit
@@ -59,6 +61,8 @@ export function setupComponent(instance) {
     // 初始化 props
     // 在 setupStatefulComponet 中的  setup 中 使用 setup(instance.props) 传值
     initProps(instance, instance.vnode.props)
+    // 初始化插槽 将虚拟节点的children 赋值 给 instance
+    initSlots(instance, instance.vnode.children) 
 
     // 初始化有状态的 component 组件 ； 函数组件没有任何状态
     setupStatefulComponet(instance)
