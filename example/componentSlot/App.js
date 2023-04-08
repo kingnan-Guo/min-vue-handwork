@@ -1,4 +1,4 @@
-import { h } from "../../lib/mini-vue-handwork.esm.js";
+import { h, creatTextVNode } from "../../lib/mini-vue-handwork.esm.js";
 import { Foo } from "./foo.js";
 
 export const App = {
@@ -14,7 +14,7 @@ export const App = {
         // return h( "div", {id: 'root'}, [app, foo, fooSingle]);
 
         // const fooSingle = h(Foo,{}, h("div", {}, "foo-slot-div-Single"))
-        const foo = h(Foo,{}, {header: ({age}) => h("div", {}, "foo-slot-div-header- age="+ age), footer:() => h("div", {}, "foo-slot-div-footer")})
+        const foo = h(Foo,{}, {header: ({age}) => [h("div", {}, "foo-slot-div-header- age="+ age), creatTextVNode('不带标签的DOM,需要creatTextVNode特殊处理')], footer:() => h("div", {}, "foo-slot-div-footer")})
         return h( "div", {id: 'root'}, [app, foo]);
 
 

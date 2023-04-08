@@ -1,6 +1,8 @@
 import { isObject } from "../shared/index";
 import { createComponetInstance, setupComponent } from "./components";
 import { ShapeFlags } from "../shared/ShapeFlags";
+import { Fragment, Text } from "./vnode";
+
 /**
  * 
  * @param vnode 虚拟节点
@@ -23,27 +25,69 @@ function patch(vnode, container) {
     // ShapeFlags 可以标识vnode -> flag 
     // ShapeFlags/ element -> string
     // ShapeFlags/ object -> STATEFUL_COMPONENT
+    const { type, shapeFlags } = vnode
 
 
-
-
-    // 判断 vnode 是不是 element 类型
-    // 如果是 element  processElement
-    //
-    // typeof(vnode.type) =string
-    // console.log("typeof(vnode.type) ==", typeof(vnode.type));
-    const { shapeFlags } = vnode
-    console.log("shapeFlags ==", shapeFlags, 'ShapeFlags ==', (shapeFlags & ShapeFlags.ELEMENT));
-    
-    if (shapeFlags & ShapeFlags.ELEMENT) { //if (typeof(vnode.type) ===string)
-        processElement(vnode, container)
-    } else if(shapeFlags & ShapeFlags.STATEFUL_COMPONENT) { // else if(isObject(vnode.type))
-        // 如果是 component processComponet
-        // typeof(vnode.type) = object
-        processComponet(vnode, container)
+    // 定义一个特殊类型 Fragment -> 只渲染  children （作用于  插槽 中  ）
+    switch (type) {
+        case Fragment:
+            processFragment(vnode, container)
+            break;
+        case Text:
+            processText(vnode, container)
+            break;
+            
+        default:
+            // ------其他正常形式---------
+            // 判断 vnode 是不是 element 类型
+            // 如果是 element  processElement
+            //
+            // typeof(vnode.type) =string
+            // console.log("typeof(vnode.type) ==", typeof(vnode.type));
+            
+            console.log("shapeFlags ==", shapeFlags, 'ShapeFlags ==', (shapeFlags & ShapeFlags.ELEMENT));
+            
+            if (shapeFlags & ShapeFlags.ELEMENT) { //if (typeof(vnode.type) ===string)
+                processElement(vnode, container)
+            } else if(shapeFlags & ShapeFlags.STATEFUL_COMPONENT) { // else if(isObject(vnode.type))
+                // 如果是 component processComponet
+                // typeof(vnode.type) = object
+                processComponet(vnode, container)
+            }
+            break;
     }
+
+
+
+
+   
 }
 
+/**
+ * processFragment 特殊处理 Fragment 类型的 vnode ； 在 插槽中使用
+ * @param vnode 
+ * @param container 
+ * 
+ * 1、先渲染出所有的children mountChildren (这样处理之后  插槽就不会再有 外层div 包裹了)
+ */
+function processFragment(vnode, container) {
+    // 
+    mountChildren(vnode, container)
+    
+}
+
+
+/**
+ * processText 处理 没有 type 的独立的 text Dom
+ * @param vnode 
+ * @param containe 
+ */
+function processText(vnode, containe) {
+    const {children} = vnode
+    // 渲染出来的元素 一定要给到 虚拟节点 vnode.el 
+    const textNode = (vnode.el = document.createTextNode(children))
+    containe.append(textNode)
+}
 
 
 /**
