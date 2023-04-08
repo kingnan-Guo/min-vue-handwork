@@ -27,12 +27,12 @@ export const App = {
                 h("p", {class: 'red'}, 'p-two'),
                 h("p", {class: 'blue'}, [
                     h("span", {class: ''}, 'p-three'),
-                    h("p", {class: 'yellow'}, 
+                    h("p", {class: 'yellow', onClick(){console.log("onClick")}}, 
                     // setUpState 方式 获取 msg
                     // 1、猜测 因为将 setUpState 通过代理 挂载到 instance 中，所以使用 this可以访问到 msg 
                     'p-four-'+this.msg ),
 
-                    h("p", {class: 'green'}, 
+                    h("p", {class: 'green', onMouseenter(){console.log("onMouseenter")}}, 
                     // $el 方式 获取 msg
                     // this.$el -> get root element  (通过 el获取到 根element 的DOM 实例)
                     'p-five-'+this.msg2 )
@@ -40,7 +40,7 @@ export const App = {
             ]
         );
     },
-    setUp(){
+    setup(){
         // vue3 使用 composition api
         return {
             //  返回对象

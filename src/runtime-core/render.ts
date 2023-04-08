@@ -95,7 +95,20 @@ function mountElement(vnode, container) {
     console.log("props ==", props);
     for (const key in props) {
         const val = props[key]
-        el.setAttribute(key, val)
+        console.log("mountElement == props ==", key , 'val ==', val);
+        // 通用方法 
+        // on Event name
+        // onMousedown
+        const isOn = (key:string) => /^on[A-Z]/.test(key) 
+        console.log("isOn(key) ==",isOn(key) );
+        if (isOn(key)) {
+            const event = key.slice(2).toLowerCase()
+            el.addEventListener(event, val)
+        } else{
+            el.setAttribute(key, val)
+        }
+        
+        
     }
     container.append(el)
 
