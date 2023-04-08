@@ -21,6 +21,19 @@ export function createVNode(type, props?, children?) {
     } else if(Array.isArray(children)) {
         vnode.shapeFlags |= ShapeFlags.ARRAY_CHILDREN
     }
+
+    // 判定是否为 slots children
+    // 首先是 个 组件 && 它的 children 必须为 object 类型
+    
+    
+    if (vnode.shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
+        if (typeof children === "object") {
+            vnode.shapeFlags |= ShapeFlags.SLOT_CHILDREN
+        }
+        
+    }
+    // console.log("vnode.shapeFlags & ShapeFlags.STATEFUL_COMPONENT ==", vnode.shapeFlags & ShapeFlags.STATEFUL_COMPONENT);
+    console.log("vnode =======", vnode);
     return vnode
 }
 
