@@ -87,11 +87,13 @@ function setupStatefulComponet(instance: any) {
     const {setup} = Component;
     if (setup) {
         /**
-         * currentInstance = instance = component 
+         * currentInstance = instance = component  || setCurrentInstance(instance)
          * 这里是获取 Component 的值存入到全局变量中，
          * 用来在  getCurrentInstance 中获取 Component 
+         * 
+         * currentInstance = instance
          */
-        currentInstance = instance
+        setCurrentInstance(instance)
 
 
         /**
@@ -111,8 +113,10 @@ function setupStatefulComponet(instance: any) {
          * 插一句
          * 清除掉 currentInstance 的值
          * 因为在此时 setup 内的 getCurrentInstance 已经获取完成
+         * currentInstance = null
          */
-        currentInstance = null
+        // 
+        setCurrentInstance(null)
 
         handleSetupResult(instance, setupResult)
     }
@@ -167,4 +171,16 @@ function finishComponentSetup(instance:any) {
 let currentInstance = null;
 export function getCurrentInstance() {
     return currentInstance;
+}
+
+/**
+ * 给 currentInstance 赋值
+ * @param instance 
+ * 好处是
+ * 当后续 想跟踪 currentInstance 被谁赋值的时候，只需在这里打上断点就可以知道
+ * 也起到了 中间层的作用
+ * 
+ */
+function setCurrentInstance(instance) {
+    currentInstance = instance
 }
