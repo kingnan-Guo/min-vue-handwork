@@ -1,6 +1,7 @@
 # mini-vue-handwork
 handwork
 
+1、重构 自定义渲染器 custon-render 之前的 版本
 
 
 
