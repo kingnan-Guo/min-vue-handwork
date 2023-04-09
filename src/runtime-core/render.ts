@@ -127,10 +127,17 @@ export function createRenderer(options) {
      * @param n1 preSubTree 老的dom
      * @param vnode  n2:vnode  当前最新的 虚拟dom
      * @param containe 
+     * 
+     * 
+     * 此处开始 更新对比  n1 与 n2 也就是 n1 与 vnode
+     * 1、对比  props
+     * 2、对比 children
      */
     function patchElement(n1, vnode, containe) {
         console.log("patchElement n1", n1, "n2:vnode", vnode);
-        
+
+        // 此处开始 更新对比 
+        // 
     }
 
 
