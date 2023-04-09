@@ -4,6 +4,7 @@ import { initProps } from "./componentProps";
 import { initSlots } from "./componentSlots";
 
 import { shallowReadonly } from "../reactivity/reactive";
+import { proxyRefs } from "../reactivity";
 /**
  * @param vnode 虚拟节点
  * 创建组件实例 
@@ -20,6 +21,8 @@ export function createComponetInstance(vnode, parent) {
         emit: () => {},// 传给父组件的值
         provides:parent ? parent.provides : {}, // 用于 apiInjest 的数据储存
         parent: parent, // 将父级 instance 储存在 子级 的 parent中
+        isMounted: false,
+        subTree: {}
     }
     // 使用bind 传值 将component 作为 "第一个参数" 传给 emit
     component.emit = emit.bind(null, component) as any;
@@ -135,8 +138,9 @@ function setupStatefulComponet(instance: any) {
  * 如果 setupResult = "object" 那么 就赋值到 组件实例instance上 
  */ 
 function handleSetupResult(instance, setupResult:any) {
-    if (typeof setupResult == "object") {
-        instance.setupState = setupResult
+    if (typeof setupResult === "object") {
+        // 将 proxyRefs 包裹 setupResult， 
+        instance.setupState = proxyRefs(setupResult) 
     }
     finishComponentSetup(instance)
 }

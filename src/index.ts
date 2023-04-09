@@ -6,3 +6,4 @@
 // export * from "./runtime-core";
 export * from "./runtime-dom";
 // import * from "@mini-vue-handwork";
+export * from "./reactivity";
