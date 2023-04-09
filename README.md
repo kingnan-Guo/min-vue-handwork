@@ -20,3 +20,9 @@ npm install tslib
 
 vscode 安装 Live Server
 https://blog.csdn.net/cc18868876837/article/details/113915176
+
+
+----------
+
+
+custom-render 中引入 pixi ：https://pixijs.com/
