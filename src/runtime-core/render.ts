@@ -10,6 +10,7 @@ import { Fragment, Text } from "./vnode";
  * render 是为了调用patch 方法，方便执行 递归处理
  */
 export function render(vnode,container) {
+    // 正常应该 将 patch 的第三个参数 传 parentComponent，但是当最开始 调用path 的时候 的虚拟Dom 是没有父级的
     patch(vnode, container, null)
 }
 
