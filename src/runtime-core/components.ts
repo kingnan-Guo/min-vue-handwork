@@ -8,15 +8,18 @@ import { shallowReadonly } from "../reactivity/reactive";
  * @param vnode 虚拟节点
  * 创建组件实例 
  */
-export function createComponetInstance(vnode) {
+export function createComponetInstance(vnode, parent) {
+    console.log("createComponetInstance = parent =", parent);
+    
     const component = {
         vnode,
         type: vnode.type,
         setupState: {},//储存 setup 的返回 的 值
         props: {},//传给子组件的数据  shallowReadony
         slots:{},// 插槽
-        emit: () => {}// 传给父组件的值
-        // el: null
+        emit: () => {},// 传给父组件的值
+        provides:parent ? parent.provides : {}, // 用于 apiInjest 的数据储存
+        parent: parent, // 将父级 instance 储存在 子级 的 parent中
     }
     // 使用bind 传值 将component 作为 "第一个参数" 传给 emit
     component.emit = emit.bind(null, component) as any;
