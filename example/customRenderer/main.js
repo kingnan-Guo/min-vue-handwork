@@ -11,7 +11,7 @@ const game = new PIXI.Application({
 })
 
 document.body.append(game.view)
-// 自定义 createRenderer 方法 渲染到 canvas 上
+// 自定义 createRenderer createElement patchProp insert 方法 将 rect 渲染到 canvas 上
 const renderer = createRenderer({
     createElement(type){
         if (type === "rect") {
