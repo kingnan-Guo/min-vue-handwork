@@ -1,4 +1,4 @@
-import { isObject } from "../shared/index";
+import { isObject, EMPTY_OBJ } from "../shared/index";
 import { createComponetInstance, setupComponent } from "./components";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { Fragment, Text } from "./vnode";
@@ -136,11 +136,63 @@ export function createRenderer(options) {
     function patchElement(n1, vnode, containe) {
         console.log("patchElement n1", n1, "n2:vnode", vnode);
 
-        // 此处开始 更新对比 
+        // 此处开始 更新对比 props  children
         // 
+        const oldProps = n1.props || EMPTY_OBJ
+        const newProps = vnode.props || EMPTY_OBJ
+        const el = (vnode.el = n1.el)
+        patchProps(el, oldProps, newProps)
     }
 
+    /**
+     *  对比 新老两个props
+     * @param oldProps 
+     * @param newProps 
+     * 
+     * for (const key in newProps)  遍历新的 props 用于 添加 
+     * 
+     * 
+     */
 
+    function patchProps(el, oldProps, newProps) {
+        //  当新老虚拟节点中的 props 不一样后才去对比
+        if(oldProps !== newProps){
+
+            for (const key in newProps) {
+                const preProps = oldProps[key]
+                const nextProps = newProps[key]
+                // 对比两个个 props 如果不相等
+                // 但是如果props 层级比较深 怎么办？？
+                if (preProps !== nextProps) {
+                    //触发更新
+                    hostPatchProps(el, key, preProps, nextProps)
+                    
+    
+                }
+            }
+            /**
+             * 如果使用 oldProps ！== {} 在这里会创建一个新的 空对象 ，如果 oldProps 没有值
+             * 那么 const oldProps = n1.props || {} 中 也会创建一个 空对象，两个空对象 不相等
+             */
+            if(oldProps !== EMPTY_OBJ) {
+
+                for (const key in oldProps) {
+                    const preProps = oldProps[key]
+                    if(!(key in newProps)){
+        
+                        hostPatchProps(el, key, preProps, null)
+                    }
+                }
+
+
+            }
+    
+
+
+
+        }
+
+    }
 
     /**
      * 去处理组件 processComponet
@@ -211,7 +263,7 @@ export function createRenderer(options) {
             // } else{
             //     el.setAttribute(key, val)
             // }
-            hostPatchProps(el, key, val)
+            hostPatchProps(el, key, null, val)
             
             
             
@@ -347,4 +399,8 @@ export function createRenderer(options) {
 }
 
 
+
+function patchProps(oldProps: any, newProps: any) {
+    throw new Error("Function not implemented.");
+}
 

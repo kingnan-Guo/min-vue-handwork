@@ -12,10 +12,22 @@ export const App = {
          * 
          */
         console.log("this.count =", this.count);
-        return h("div", {id: 'root'}, [
-            h("div", {}, "count:"+ this.count),
-            h("button", {onClick: this.onClick}, "click")
-        ])
+        // return h("div", {id: 'root'}, [
+        //     h("div", {}, "count:"+ this.count),
+        //     h("button", {onClick: this.onClick}, "click")
+        // ])
+        return h("div",{id: "root",...this.props},
+            [
+              h("div", {}, "count:" + this.count),
+              h("button", { onClick: this.onClick, }, "click"),
+              h("button", { onClick: this.onChangePropsDemo1, }, "changeProps - 值改变了 - 修改"),
+              h("button", { onClick: this.onChangePropsDemo2, }, "changeProps - 值变成了 undefined - 删除"),
+              h("button", { onClick: this.onChangePropsDemo3, }, "changeProps - key 在新的里面没有了 - 删除"),
+              
+              // h("button", {  }, "changeProps - 层级比较深的 props"),
+            ]
+          );
+
     },
     setup(){
         const count = ref(0);
@@ -32,9 +44,41 @@ export const App = {
         const onClick = () => {
             count.value++;
         }
+
+        /**
+         * 
+         */
+        const props = ref({
+          foo: "foo",
+          bar: "bar",
+          data:{
+            data2:{
+              data3: 'cc'
+            }
+          }
+        });
+        const onChangePropsDemo1 = () => {
+          props.value.foo = "new-foo";
+        };
+    
+        const onChangePropsDemo2 = () => {
+          props.value.foo = undefined;
+        };
+    
+        const onChangePropsDemo3 = () => {
+          props.value = {
+            foo: "foo",
+          };
+        };
+
+
         return {
             count, 
-            onClick
+            onClick,
+            onChangePropsDemo1,
+            onChangePropsDemo2,
+            onChangePropsDemo3,
+            props,
         } 
     }
 }

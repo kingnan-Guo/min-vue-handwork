@@ -5,10 +5,10 @@ function createElement(type) {
     return document.createElement(type)
 }
 
-function patchProp(el, key, val) {
+function patchProp(el, key, preVal, nextVal) {
     console.log("patchProp -------------------");
     
-    console.log("mountElement == props ==", key , 'val ==', val);
+    console.log("mountElement == props ==", key , 'val ==', nextVal);
     // 通用方法 
     // on Event name
     // onMousedown
@@ -16,9 +16,14 @@ function patchProp(el, key, val) {
     console.log("isOn(key) ==",isOn(key) );
     if (isOn(key)) {
         const event = key.slice(2).toLowerCase()
-        el.addEventListener(event, val)
+        el.addEventListener(event, nextVal)
     } else{
-        el.setAttribute(key, val)
+        if (nextVal === undefined || nextVal == null) {
+            el.removeAttribute(key, nextVal) 
+        } else {
+            el.setAttribute(key, nextVal)
+        }
+        
     }
 
 }
