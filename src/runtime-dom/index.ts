@@ -33,8 +33,22 @@ function insert(el, container) {
     container.append(el)
 }
 
+// 删除 children
+function remove(child) {
+    // 先获取到父级元素
+    const parent = child.parentNode
+    if (parent) {
+        parent.removeChild(child)
+    }
+}
+
+// 给容器设置文本
+function setElementText(el, text) {
+    el.textContent = text
+}
+
 const renderer:any =  createRenderer({
-    createElement, patchProp, insert
+    createElement, patchProp, insert, remove, setElementText
 })
 
 // 使用 createRenderer 的return 返回 createApp 

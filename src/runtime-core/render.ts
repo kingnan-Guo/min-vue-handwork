@@ -7,7 +7,7 @@ import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
 
 export function createRenderer(options) {
-    const { createElement:hostCreateElement, patchProp: hostPatchProps, insert: hostInsert } = options
+    const { createElement:hostCreateElement, patchProp: hostPatchProps, insert: hostInsert, remove: hostRemove, setElementText: hostSetElementText } = options
 
     /**
      * 
@@ -88,7 +88,7 @@ export function createRenderer(options) {
      */
     function processFragment(n1, vnode, container, parentComponent) {
         // 
-        mountChildren(vnode, container, parentComponent)
+        mountChildren(vnode.children, container, parentComponent)
         
     }
 
@@ -117,7 +117,7 @@ export function createRenderer(options) {
             // 初始化 虚拟DOM  默认：将数据 append 到 容器中， 可以自定义
             mountElement(vnode, container, parentComponent)
         } else{
-            patchElement(n1, vnode, container)
+            patchElement(n1, vnode, container, parentComponent)
         }
         
     }
@@ -133,16 +133,73 @@ export function createRenderer(options) {
      * 1、对比  props
      * 2、对比 children
      */
-    function patchElement(n1, vnode, containe) {
+    function patchElement(n1, vnode, containe, parentComponent) {
         console.log("patchElement n1", n1, "n2:vnode", vnode);
+
+
 
         // 此处开始 更新对比 props  children
         // 
         const oldProps = n1.props || EMPTY_OBJ
         const newProps = vnode.props || EMPTY_OBJ
         const el = (vnode.el = n1.el)
+
+        patchChildren(n1, vnode, el, parentComponent)
         patchProps(el, oldProps, newProps)
     }
+
+    /**
+     * 对比更新 children
+     * @param n1 老
+     * @param vnode 新 
+     * 
+     * 1、对比 text 与数组
+     */
+    function patchChildren(n1, vnode, container, parentComponent) {
+        const {shapeFlags} = vnode
+        const preShapeFlags = n1.shapeFlags
+        const c1 = n1.children
+        const c2 = vnode.children
+        if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
+            // 新的节点vnode是一个 text
+            if (preShapeFlags & ShapeFlags.ARRAY_CHILDREN) {
+                // 老节点preShapeFlag 是一个 数组
+                // 1、把老的children清空
+                unmountChildren(n1.children)
+                // 2、设置text
+                // hostSetElementText(container, c2)
+
+            }
+
+            if(c1 !== c2){
+                // 2、设置text
+                hostSetElementText(container, c2)
+            }
+
+        } else{
+            // vnode<array>
+            if(shapeFlags & ShapeFlags.ARRAY_CHILDREN){
+                hostSetElementText(container, "")
+                mountChildren(c2, container, parentComponent)
+            }
+        }
+ 
+
+    }
+
+    /**
+     * 把老的 children 清空
+     * @param children 
+     */
+    function unmountChildren(children) {
+        for (let index = 0; index < children.length; index++) {
+            const element = children[index].el;
+            // remove
+            hostRemove(element)
+            
+        }
+    }
+
 
     /**
      *  对比 新老两个props
@@ -240,7 +297,7 @@ export function createRenderer(options) {
             // children.forEach((vn) => {
             //     patch(vn, el)
             // })
-            mountChildren(vnode, el, parentComponent)
+            mountChildren(vnode.children, el, parentComponent)
         }
         console.log("props ==", props);
         for (const key in props) {
@@ -285,11 +342,20 @@ export function createRenderer(options) {
      * 
      * 每一个children 内部都是 一个虚拟节点vnode ，每一次都要判断是 element 还是 components
      */
-    function mountChildren(vnode, container, parentComponent) {
-        vnode.children.forEach((vn) => {
+    // function mountChildren(vnode, container, parentComponent) {
+    //     vnode.children.forEach((vn) => {
+    //         patch(null, vn, container, parentComponent)
+    //     })
+    // }
+    function mountChildren(children, container, parentComponent) {
+        children.forEach((vn) => {
             patch(null, vn, container, parentComponent)
         })
     }
+
+
+
+
     /**
      * 
      * @param vnode 
