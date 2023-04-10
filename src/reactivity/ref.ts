@@ -9,7 +9,7 @@ class RefImpl{
     private _rawValue:any;// 未处理的 value
     public _v_isRef = true
     constructor(value){
-        this._rawValue = this.value
+        this._rawValue = value;
         // value -> 使用 reactive 包裹
         // 1、判断 value 是不是对象
         // 2、如果是对象那么执行  reactive(value)
