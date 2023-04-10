@@ -122,6 +122,21 @@ export function triggerEffects(dep) {
             effect.run()
         }
     }
+    // // 因为  ES5 中 dep 无法 for of 所以改成 foreach
+    // dep.forEach(effect => {
+    //     console.log("triggerEffects = effect =", effect);
+        
+    //     if (effect.scheduler) {
+    //         // console.log('effect ==',typeof(effect.scheduler) );
+    //         effect.scheduler()
+    //     } else {
+    //         effect.run()
+    //     }
+    // });
+
+
+
+
 }
 
 
