@@ -28,9 +28,18 @@ function patchProp(el, key, preVal, nextVal) {
 
 }
 
-function insert(el, container) {
+/**
+ * 
+ * @param el 
+ * @param container 
+ * @param anchor 锚点 新的 el添加到 container 中的位置
+ * 
+ */
+function insert(el, container, anchor) {
     console.log("insert -------------------");
-    container.append(el)
+    // container.append(el)
+    // 把元素指定添加到某个 元素之前，如果 anchor = null 那么添加到最后  与append 一样
+    container.insertBefore(el, anchor || null)
 }
 
 // 删除 children

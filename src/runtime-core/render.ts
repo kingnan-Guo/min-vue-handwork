@@ -17,7 +17,7 @@ export function createRenderer(options) {
      */
     function render(vnode,container) {
         // 正常应该 将 patch 的第三个参数 传 parentComponent，但是当最开始 调用path 的时候 的虚拟Dom 是没有父级的
-        patch(null, vnode, container, null)
+        patch(null, vnode, container, null, null)
     }
 
     /**
@@ -37,7 +37,7 @@ export function createRenderer(options) {
      * 
      * function patch( n1, n2, container, parentComponent: any)
      */
-    function patch( n1, vnode, container, parentComponent: any) {
+    function patch( n1, vnode, container, parentComponent: any, anchor) {
         // ShapeFlags 可以标识vnode -> flag 
         // ShapeFlags/ element -> string
         // ShapeFlags/ object -> STATEFUL_COMPONENT
@@ -47,7 +47,7 @@ export function createRenderer(options) {
         // 定义一个特殊类型 Fragment -> 只渲染  children （作用于  插槽 中  ）
         switch (type) {
             case Fragment:
-                processFragment(n1, vnode, container, parentComponent)
+                processFragment(n1, vnode, container, parentComponent, anchor)
                 break;
             case Text:
                 processText(n1, vnode, container)
@@ -64,11 +64,11 @@ export function createRenderer(options) {
                 console.log("shapeFlags ==", shapeFlags, 'ShapeFlags ==', (shapeFlags & ShapeFlags.ELEMENT));
                 
                 if (shapeFlags & ShapeFlags.ELEMENT) { //if (typeof(vnode.type) ===string)
-                    processElement(n1, vnode, container, parentComponent)
+                    processElement(n1, vnode, container, parentComponent, anchor)
                 } else if(shapeFlags & ShapeFlags.STATEFUL_COMPONENT) { // else if(isObject(vnode.type))
                     // 如果是 component processComponet
                     // typeof(vnode.type) = object
-                    processComponet(n1, vnode, container, parentComponent)
+                    processComponet(n1, vnode, container, parentComponent, anchor)
                 }
                 break;
         }
@@ -86,9 +86,9 @@ export function createRenderer(options) {
      * 
      * 1、先渲染出所有的children mountChildren (这样处理之后  插槽就不会再有 外层div 包裹了)
      */
-    function processFragment(n1, vnode, container, parentComponent) {
+    function processFragment(n1, vnode, container, parentComponent, anchor) {
         // 
-        mountChildren(vnode.children, container, parentComponent)
+        mountChildren(vnode.children, container, parentComponent, anchor)
         
     }
 
@@ -111,13 +111,13 @@ export function createRenderer(options) {
      * @param vnode 
      * @param container 
      */
-    function processElement(n1, vnode, container, parentComponent) {
+    function processElement(n1, vnode, container, parentComponent, anchor) {
         // 如果n1 不存在 那么是初始化
         if (!n1) {
             // 初始化 虚拟DOM  默认：将数据 append 到 容器中， 可以自定义
-            mountElement(vnode, container, parentComponent)
+            mountElement(vnode, container, parentComponent, anchor)
         } else{
-            patchElement(n1, vnode, container, parentComponent)
+            patchElement(n1, vnode, container, parentComponent, anchor)
         }
         
     }
@@ -133,7 +133,7 @@ export function createRenderer(options) {
      * 1、对比  props
      * 2、对比 children
      */
-    function patchElement(n1, vnode, containe, parentComponent) {
+    function patchElement(n1, vnode, containe, parentComponent, anchor) {
         console.log("patchElement n1", n1, "n2:vnode", vnode);
 
 
@@ -144,7 +144,7 @@ export function createRenderer(options) {
         const newProps = vnode.props || EMPTY_OBJ
         const el = (vnode.el = n1.el)
 
-        patchChildren(n1, vnode, el, parentComponent)
+        patchChildren(n1, vnode, el, parentComponent, anchor)
         patchProps(el, oldProps, newProps)
     }
 
@@ -155,7 +155,7 @@ export function createRenderer(options) {
      * 
      * 1、对比 text 与数组
      */
-    function patchChildren(n1, vnode, container, parentComponent) {
+    function patchChildren(n1, vnode, container, parentComponent, anchor) {
         const {shapeFlags} = vnode
         const preShapeFlags = n1.shapeFlags
         const c1 = n1.children
@@ -178,14 +178,109 @@ export function createRenderer(options) {
 
         } else{
             // vnode<array>
-            if(shapeFlags & ShapeFlags.ARRAY_CHILDREN){
+            if(shapeFlags & ShapeFlags.TEXT_CHILDREN){
                 hostSetElementText(container, "")
-                mountChildren(c2, container, parentComponent)
+                mountChildren(c2, container, parentComponent, anchor)
+            } else{
+                console.log("------ array diff array -------");
+                
+                // array diff array
+                // 设置三个指针 i：可以移动的 i i<= e1 & i<=e2；  e1:当前这个数组的最后位置； e2:新数据 最后的索引值
+                patchKeyChildren(c1, c2, container, parentComponent, anchor);
+            
+            
             }
         }
  
 
     }
+
+    /**
+     * array diff array
+     * 双端指针对比
+     * @param c1 
+     * @param c2 
+     * 
+     * 先对比前后两侧找到不同的 索引
+     */
+
+    function patchKeyChildren(c1, c2, container, parentComponent, parentAnchor) {
+        let i = 0;
+        const l2 = c2.length
+        let e1 = c1.length - 1;
+        let e2 = l2- 1;
+        // 检测节点是否一样
+        function isSomeVNodeType(n1, n2) {
+            // 检测type  key
+            return n1.type === n2.type && n1.key === n2.key
+        }
+
+        while(i<=e1 && i <=e2){
+            const n1 = c1[i]
+            const n2 = c2[i]
+            //如果两个节点一样 那么 再次进行递归patch 进行属性对比 props children
+            if (isSomeVNodeType(n1, n2)) {
+                patch(n1, n2, container, parentComponent, parentAnchor)
+            } 
+            // 如果不一样的时候 跳出循环
+            else {
+              break
+            }
+            // 移动 i 这个指针
+            i++
+        }
+        console.log("指针 i 的位置", i);
+
+        // 右侧对比
+        while(i<=e1 && i <=e2){
+            const n1 = c1[e1]
+            const n2 = c2[e2]
+            //如果两个节点一样 那么 再次进行递归patch 进行属性对比 props children
+            if (isSomeVNodeType(n1, n2)) {
+                patch(n1, n2, container, parentComponent, parentAnchor)
+            } 
+            // 如果不一样的时候 跳出循环
+            else {
+              break
+            }
+            // 移动 i 这个指针
+            e1--
+            e2--
+        }
+
+        console.log("指针 i 的位置", i , "末端指针索引的位置  e1 ", e1, ' = e2 = ',e2);
+        
+        // 新的比老的 多 ,左侧对比 右侧对比
+        if(i > e1){
+            if(i<= e2){
+
+                // 在 当前的 DOM 节点前 添加数据 ，
+                const nextPos = e2 + 1
+                const anchor = nextPos < l2 ? c2[nextPos].el : null
+                while (i <= e2 ) {
+                    // 新增 数据 所以 n1 是没有的
+                    patch(null, c2[i], container, parentComponent, anchor)
+                    i++
+                }
+            }
+            console.log("指针 i 的位置", i , "末端指针索引的位置  e1 ", e1, ' = e2 = ',e2);
+        } else if(i > e2){
+            while (i <= e1) {
+                // 删除所有获取到的 节点
+                hostRemove(c1[i].el)
+                i++
+            }
+        } 
+        // 乱序部分
+        else{
+
+        }
+
+        
+    }
+
+
+
 
     /**
      * 把老的 children 清空
@@ -256,8 +351,8 @@ export function createRenderer(options) {
      * @param vnode 
      * @param container 
      */
-    function processComponet(n1, vnode: any, container: any, parentComponent: any) {
-        mountComponet(vnode, container, parentComponent)
+    function processComponet(n1, vnode: any, container: any, parentComponent: any, anchor) {
+        mountComponet(vnode, container, parentComponent, anchor)
     }
 
     /**
@@ -265,7 +360,7 @@ export function createRenderer(options) {
      * @param vnode 
      * @param container 
      */
-    function mountElement(vnode, container, parentComponent) {
+    function mountElement(vnode, container, parentComponent, anchor) {
         const {type, props, children, shapeFlags} = vnode;
         console.log("mountElement =vnode=", vnode, type);
         /**
@@ -297,7 +392,7 @@ export function createRenderer(options) {
             // children.forEach((vn) => {
             //     patch(vn, el)
             // })
-            mountChildren(vnode.children, el, parentComponent)
+            mountChildren(vnode.children, el, parentComponent, anchor)
         }
         console.log("props ==", props);
         for (const key in props) {
@@ -331,7 +426,7 @@ export function createRenderer(options) {
          * 此处原本的代码：
          *      // container.append(el)
          */
-        hostInsert(el, container)
+        hostInsert(el, container, anchor)
 
     }
 
@@ -347,9 +442,9 @@ export function createRenderer(options) {
     //         patch(null, vn, container, parentComponent)
     //     })
     // }
-    function mountChildren(children, container, parentComponent) {
+    function mountChildren(children, container, parentComponent, anchor) {
         children.forEach((vn) => {
-            patch(null, vn, container, parentComponent)
+            patch(null, vn, container, parentComponent, anchor)
         })
     }
 
@@ -361,16 +456,16 @@ export function createRenderer(options) {
      * @param vnode 
      * @param container 
      */
-    function mountComponet(vnode: any, container: any, parentComponent: any) {
+    function mountComponet(vnode: any, container: any, parentComponent: any, anchor) {
         // 创建组件实例 
         // 将父级传给 当前 组件实例
         const instance = createComponetInstance(vnode, parentComponent)
         setupComponent(instance) //这里 处理 instance 并将 render 赋值给 instance 
         
-        setupRenderEffect( instance, vnode, container, parentComponent)
+        setupRenderEffect( instance, vnode, container, parentComponent, anchor)
     }
     // 
-    function setupRenderEffect(instance, vnode, container, parentComponent) {
+    function setupRenderEffect(instance, vnode, container, parentComponent, anchor) {
         // 使用effect 进行依赖收集 ，当响应式 数据进行改变的时候 ，重新出发render 重新渲染,
         // 当 触发 render 函数后 会出发 this.count  的 get 操作，进行依赖收集
         effect(() => {
@@ -400,7 +495,7 @@ export function createRenderer(options) {
     
                 // patch 属于 初始化 第一创建节点的时候 添加
                 // patch 这里是 递归循环调用 ，但现在不知到如何跳出循环
-                patch(null, subTree, container, instance)
+                patch(null, subTree, container, instance, anchor)
         
         
                 //储存 elemet 要在 所有的 mount 完成 之后
@@ -442,7 +537,7 @@ export function createRenderer(options) {
                 instance.subTree = subTree
 
                 // 因为 patch 之前全部都是初始化 ，所以要给patch 添加 更新逻辑
-                patch(prevSubTree, subTree, container, instance)
+                patch(prevSubTree, subTree, container, instance, anchor)
 
             }
 

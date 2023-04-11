@@ -19,6 +19,7 @@ export function createVNode(type, props?, children?) {
         children,
         el: null,
         shapeFlags:getShapeFlag(type),
+        key:props &&props.key, //新增key 字段
     }
     if (typeof children === "string") {
         vnode.shapeFlags |=  ShapeFlags.TEXT_CHILDREN
