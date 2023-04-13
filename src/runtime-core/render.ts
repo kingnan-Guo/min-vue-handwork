@@ -6,6 +6,8 @@ import { Fragment, Text } from "./vnode";
 import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
 
+import { shoudUpdateComponent } from "./componentUpdateUtils";
+
 export function createRenderer(options) {
     const { createElement:hostCreateElement, patchProp: hostPatchProps, insert: hostInsert, remove: hostRemove, setElementText: hostSetElementText } = options
 
@@ -493,8 +495,51 @@ export function createRenderer(options) {
      * @param container 
      */
     function processComponet(n1, vnode: any, container: any, parentComponent: any, anchor) {
-        mountComponet(vnode, container, parentComponent, anchor)
+        // n1 没有值的时候说明 是初始化
+        if (!n1) {
+            mountComponet(vnode, container, parentComponent, anchor)
+        } else{
+            // update
+            updateComponent(n1, vnode)
+        }
+        
     }
+
+    /**
+     * 更新组件
+     * 更新组件就是调用这个组件的render 函数 ，重新生成一个虚拟节点，在进行patch 在进行对比
+     * @param vnode 
+     * @param container 
+     * 
+     * 调用effect的时候 返回runner，当调用runner 时 ，会调用里传给里面的函数
+    
+     * 将 instance.upDate 收集到的 runner 进行调用
+     * 本身在 n1 中无法找到 组件component 所以在 创建vnode 时候，将组件挂在到vnode,在 mountomponent给他赋值
+     */
+    function updateComponent(n1, vnode) {
+
+        // 从 n1 中取出 组件component，赋值给n2，就像之前处理 el 一样
+        const  instance = (vnode.component =n1.component)
+
+        // 需要更新
+        if (shoudUpdateComponent(n1, vnode)) {
+            
+            instance.next = vnode;//要被更新的虚拟节点
+
+            instance.upDate()
+
+        } else{
+            // 不需要更新时 也要重置虚拟节点
+            vnode.el = n1.el;
+            instance.vnode = vnode;
+        }
+
+    }
+
+
+
+
+
 
     /**
      * 
@@ -594,13 +639,15 @@ export function createRenderer(options) {
 
     /**
      * 
-     * @param vnode 
+     * @param vnode : initalVNode
      * @param container 
      */
     function mountComponet(vnode: any, container: any, parentComponent: any, anchor) {
         // 创建组件实例 
         // 将父级传给 当前 组件实例
-        const instance = createComponetInstance(vnode, parentComponent)
+
+        // 在初始化 component的时候 收集组件
+        const instance =(vnode.component =  createComponetInstance(vnode, parentComponent))
         setupComponent(instance) //这里 处理 instance 并将 render 赋值给 instance 
         
         setupRenderEffect( instance, vnode, container, parentComponent, anchor)
@@ -609,7 +656,9 @@ export function createRenderer(options) {
     function setupRenderEffect(instance, vnode, container, parentComponent, anchor) {
         // 使用effect 进行依赖收集 ，当响应式 数据进行改变的时候 ，重新出发render 重新渲染,
         // 当 触发 render 函数后 会出发 this.count  的 get 操作，进行依赖收集
-        effect(() => {
+
+        // 使用 instance.upDate 收集 effect 返回的runner
+        instance.upDate = effect(() => {
 
             // 添加新的 变量 来 判定 instance 的状态
             // instance.isMounted = false是 是个 初始化状态
@@ -651,8 +700,27 @@ export function createRenderer(options) {
 
             } else {
                 console.log("upDate");
+                
+                
+                                // 整个过程 要在 更新之前
+                // 还要更新组件的props
+                // 更新时 将 要被更新的虚拟节点从 instance 中取出来
+                //vnode 指向的是更新之前的虚拟节点
+                // next 是下次要更新的虚拟节点
+                const {next, vnode} = instance
+                if (next) {
+                    next.el = vnode.el
+                    updateComponentPreRender(instance, next)    
+                }
+
+                
+                
+                
                 // 在更新阶段再一次调用subTree
 
+                
+                
+                
                 // 通过 instance 返回 proxy 代理对象
                 const { proxy } = instance 
         
@@ -667,6 +735,15 @@ export function createRenderer(options) {
                 // 当重新调用render后 会重新生成 subTree 
                 console.log("subTree =", subTree);
 
+
+
+
+
+
+
+
+
+
                 // 对比现在和之前的subTree 
                 // 先把之前的subTree 获取处理啊
                 const prevSubTree = instance.subTree
@@ -679,6 +756,7 @@ export function createRenderer(options) {
 
                 // 因为 patch 之前全部都是初始化 ，所以要给patch 添加 更新逻辑
                 patch(prevSubTree, subTree, container, instance, anchor)
+
 
             }
 
@@ -700,6 +778,21 @@ export function createRenderer(options) {
 
 }
 
+
+/**
+ * 
+ * @param instance 
+ * @param nextVNode 
+ * 更新实例对象上的 props，从 nextVNode.props给到他
+ */
+function updateComponentPreRender(instance, nextVNode) {
+    //  把虚拟节点更新一下
+    instance.vnode = nextVNode
+    instance.next = null
+
+    instance.props = nextVNode.props
+
+}
 
 
 function patchProps(oldProps: any, newProps: any) {

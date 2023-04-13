@@ -17,6 +17,8 @@ export function createVNode(type, props?, children?) {
         type,
         props,
         children,
+        component: null,
+        next: null, //要被更新的虚拟节点
         el: null,
         shapeFlags:getShapeFlag(type),
         key:props &&props.key, //新增key 字段
