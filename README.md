@@ -26,3 +26,9 @@ https://blog.csdn.net/cc18868876837/article/details/113915176
 
 
 custom-render 中引入 pixi ：https://pixijs.com/
+
+
+
+-----
+在 jest 阶段 去掉
+package.json ->    "type": "module",
