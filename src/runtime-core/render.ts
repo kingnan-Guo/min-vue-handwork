@@ -8,6 +8,8 @@ import { effect } from "../reactivity/effect";
 
 import { shoudUpdateComponent } from "./componentUpdateUtils";
 
+import { queueJobs } from "./scheduler";
+
 export function createRenderer(options) {
     const { createElement:hostCreateElement, patchProp: hostPatchProps, insert: hostInsert, remove: hostRemove, setElementText: hostSetElementText } = options
 
@@ -764,6 +766,12 @@ export function createRenderer(options) {
           
 
 
+        },{
+            // 当所有数据都循环完成再去调用
+            scheduler(){
+                console.log("upDate - scheduler");
+                queueJobs(instance.upDate)
+            }
         })
 
 
