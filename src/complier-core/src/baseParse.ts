@@ -38,24 +38,24 @@ function createRoot(children) {
 
 function parseChildren(context, ancestors) {
     const nodes:any = [];
-    const isE = isEnd(context, ancestors)
-    console.log(isE);
+    // const isE = isEnd(context, ancestors)
+    // console.log(isE);
     
-    while (!isE) {
+    while (!isEnd(context, ancestors)) {
    
         let node;
         const s = context.source;
         if (s.startsWith("{{")) {
-            node = parserInterpolation(context);
+            node = parseInterpolation(context);
             
-        }  else if (s[0] === "<") {
+        } else if (s[0] === "<") {
             if (/[a-z]/i.test(s[1])) {
                 // console.log("parse element");
                 node = parseElement(context, ancestors);
             }
         }
         
-        if(!node){
+        if (!node) {
             node = parseText(context);
         }
         nodes.push(node);
@@ -127,8 +127,8 @@ function parseText(context: any) {
     // advanceBy(context, content.length)
 
     const content = parseTextData(context, endIndex);
-    console.log(" text  context.source =", context.source);
-    console.log("parseText  content =", content);
+    //console.log(" text  context.source =", context.source);
+    //console.log("parseText  content =", content);
     
     return {
         type: NodeTypes.TEXT,
@@ -163,15 +163,15 @@ function parseElement(context: any, ancestors) {
 
     // 如果此处标签相等 那么此处时 end标签 去消费
     if (startsWithEndTagOpen(context.source, element.tag)) {
-        parseTag(context, TagType.End)
+        parseTag(context, TagType.End);
     } else {
-        console.log("Element =", `缺少结束标签${element.tag}`);
+        //console.log("Element =", `缺少结束标签${element.tag}`);
         throw new Error(`缺少结束标签:${element.tag}`);
     }
     // parseTag(context, TagType.End)
 
 
-    console.log('context.source', context.source);
+    //console.log('context.source', context.source);
     return element;
     // return {
     //     type: NodeTypes.ELEMENT,
@@ -181,23 +181,27 @@ function parseElement(context: any, ancestors) {
 }
 
 function startsWithEndTagOpen(source, tag) {
-    return source.startsWith("</") && source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
+    // return (source.startsWith("</") && source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase())
+    return (
+        source.startsWith("</") &&
+        source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
+      );
 }
 
 
-function parseTag(context: any, type:TagType) {
-    const match:any = /^<\/?([a-z]*)/i.exec(context.source)
+function parseTag(context: any, type: TagType) {
+    const match: any = /^<\/?([a-z]*)/i.exec(context.source);
     console.log("match =", match);
-    const tag = match[1]
-    advanceBy(context, match[0].length)
-    advanceBy(context, 1)
+    const tag = match[1];
+    advanceBy(context, match[0].length);
+    advanceBy(context, 1);
     if (type == TagType.End) {
         return
     }
     return {
         type: NodeTypes.ELEMENT,
         tag: tag,
-    }
+    };
 
 }
 
@@ -208,27 +212,30 @@ function parseTag(context: any, type:TagType) {
 /**
  * 解析插值
  */
-function parserInterpolation(context) {
+function parseInterpolation(context) {
     // {{message}}
 
-    const openDelimiter = "{{"
-    const closeDelimiter = "}}"
+    const openDelimiter = "{{";
+    const closeDelimiter = "}}";
     // 从第二个值开始查找 
-    const closeIndex = context.source.indexOf(closeDelimiter, openDelimiter.length)
+    const closeIndex = context.source.indexOf(
+        closeDelimiter, 
+        openDelimiter.length
+    );
     // 推进
     // context.source = context.source.slice(openDelimiter.length)
-    advanceBy(context, openDelimiter.length)
+    advanceBy(context, openDelimiter.length);
 
-    const rawContentLenth = closeIndex - openDelimiter.length;
+    const rawContentLength = closeIndex - openDelimiter.length;
     // content 是去除双括号的值
     // const rawContent = context.source.slice(0, rawContentLenth)
-    const rawContent = parseTextData(context, rawContentLenth)
+    const rawContent = parseTextData(context, rawContentLength);
     // 去除空格
-    const content = rawContent.trim()
+    const content = rawContent.trim();
 
     // context.source = context.source.slice(rawContentLenth + closeDelimiter.length)
     // advanceBy(context, rawContentLenth + closeDelimiter.length )
-    advanceBy(context, closeDelimiter.length )
+    advanceBy(context, closeDelimiter.length);
     // console.log("context =", context);
 
     return {
@@ -247,7 +254,7 @@ function parserInterpolation(context) {
  */
 function advanceBy(context, length) {
     // context.source.indexOf(context, length)
-    context.source = context.source.slice(length)
+    context.source = context.source.slice(length);
 
 }
 
