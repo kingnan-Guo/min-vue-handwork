@@ -31,7 +31,8 @@ export function baseParse(content:string) {
  */
 function createRoot(children) {
     return{
-        children
+        children,
+        type: NodeTypes.ROOT
     }
 }
 
@@ -241,7 +242,7 @@ function parseInterpolation(context) {
     return {
         type: NodeTypes.INTERPOLATION,// "interpolation",
         content: {
-            type: NodeTypes.INTERPOLATION,
+            type: NodeTypes.SIMPLE_EXPRESSION,
             content:content
         }
     }
