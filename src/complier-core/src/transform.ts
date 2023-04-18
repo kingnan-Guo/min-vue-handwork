@@ -1,4 +1,5 @@
 import { NodeTypes } from "./ast";
+import { TO_DISPLAY_STRING, helperMapName } from "./runtimeHelpers";
 
 /**
  * 
@@ -11,6 +12,9 @@ export function transform(root, options:any = {}) {
     traverseNode(root, context);
     createRootCodegen(root)
 
+    // 将 helps 存入跟节点 root
+    root.helpers = [...context.helpers.keys()]
+
 }
 
 
@@ -18,7 +22,11 @@ export function transform(root, options:any = {}) {
 function creatTransformContext(root: any, options: any) {
     const context = {
         root,
-        nodeTransforms:options.nodeTransforms || []
+        nodeTransforms:options.nodeTransforms || [],
+        helpers: new Map(),
+        helper(key){
+            context.helpers.set(key, 1)
+        }
     }
     return context;
 }
@@ -40,7 +48,25 @@ function traverseNode(node: any, context: any) {
     //     node.content = node.content + "hellow"
     // }
 
-    traverseChildren(node,  context)
+
+    // 此处判断 是否为 插值
+    switch (node.type) {
+        case NodeTypes.INTERPOLATION:
+            // 希望 context  上有一个type
+            context.helper(TO_DISPLAY_STRING)
+            break;
+        case NodeTypes.ELEMENT:
+            traverseChildren(node,  context)
+            break;
+        case NodeTypes.ROOT:
+            traverseChildren(node,  context)
+            break;
+
+        default:
+            break;
+    }
+
+    
 }
 
 function traverseChildren(node: any, context: any) {
