@@ -1,18 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`code Generate  element 1`] = `
-"const { creatElementVNode: _creatElementVNode } = Vue
-return function render(_ctx, _cache){return _creatElementVNode('div', null, null)}"
+"const { createElementVNode: _createElementVNode } = Vue
+return function render(_ctx, _cache){return _createElementVNode('div', null, null)}"
 `;
 
 exports[`code Generate  element-all 1`] = `
-"const { toDisplayString: _toDisplayString, creatElementVNode: _creatElementVNode } = Vue
-return function render(_ctx, _cache){return _creatElementVNode('div', null, 'king-' + _toDisplayString(_ctx.message))}"
+"const { toDisplayString: _toDisplayString, createElementVNode: _createElementVNode } = Vue
+return function render(_ctx, _cache){return _createElementVNode('div', null, 'king-' + _toDisplayString(_ctx.message))}"
 `;
 
 exports[`code Generate  element-all-test 1`] = `
-"const { creatElementVNode: _creatElementVNode, toDisplayString: _toDisplayString } = Vue
-return function render(_ctx, _cache){return _creatElementVNode('div', null,_creatElementVNode(span, null,))}"
+"const { createElementVNode: _createElementVNode, toDisplayString: _toDisplayString } = Vue
+return function render(_ctx, _cache){return _createElementVNode('div', null,_createElementVNode(span, null,))}"
 `;
 
 exports[`code Generate  interpolation 1`] = `
