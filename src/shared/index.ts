@@ -36,3 +36,7 @@ export const camelize = (str: string) =>{
 
 // 创建空对象
 export const EMPTY_OBJ = {}
+
+export const isString = (value) => {
+    return typeof value === "string"
+}
