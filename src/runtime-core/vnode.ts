@@ -3,6 +3,16 @@ import { ShapeFlags } from "../shared/ShapeFlags";
 // 这样保证特殊字符 Fragment  整个项目里唯一
 export const Fragment = Symbol("Fragment")
 export const Text = Symbol("Text")
+
+/**
+ * 用在 transform -> gencode 阶段 的 createElementVNode
+ */
+export {
+    createVNode as createElementVNode
+}
+
+
+
 /**
  * 
  * @param type 

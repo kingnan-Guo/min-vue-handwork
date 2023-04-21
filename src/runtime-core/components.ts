@@ -160,6 +160,15 @@ function finishComponentSetup(instance:any) {
     console.log("finishComponentSetup == instance ==", instance);
     
     const Component = instance.type
+    /**
+     * 1、如果 用户 写了 render 函数 那么优先级最高
+     * 2、Component.template 查看是否有 template模板
+     */
+    if (compiler && !Component.render) {
+        if (Component.template) {
+            Component.render = compiler(Component.template)
+        }
+    }
     if (Component.render) {
         instance.render = Component.render
     }
@@ -190,4 +199,9 @@ export function getCurrentInstance() {
  */
 function setCurrentInstance(instance) {
     currentInstance = instance
+}
+
+let compiler;
+export function registerRuntimeCopmpiler(_compiler) {
+    compiler = _compiler
 }

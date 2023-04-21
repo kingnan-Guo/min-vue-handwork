@@ -677,7 +677,12 @@ export function createRenderer(options) {
                 // const subTree = instance.render()
                 // const subTree = instance.render.call(proxy)
                 // 初始化阶段先储存一个 subTree
-                const subTree = (instance.subTree = instance.render.call(proxy))
+                // const subTree = (instance.subTree = instance.render.call(proxy))
+                // 再传入代理对象  第一个proxy 就是this 第二个是传值
+                const subTree = (instance.subTree = instance.render.call(proxy, proxy))
+
+
+
                 // 基于  render() return 出来的 vnode 去调用  patch
                 // vnode 是 element ，将 element 处理 挂载出来 ，进行 mounElement 处理
         
@@ -730,7 +735,12 @@ export function createRenderer(options) {
                 // 调用 render 函数
                 // subTree 是虚拟节点树
                 // const subTree = instance.render()
-                const subTree = instance.render.call(proxy)
+
+                // const subTree = instance.render.call(proxy)
+                // 再传入代理对象  第一个proxy 就是this 第二个是传值
+                const subTree = instance.render.call(proxy, proxy)
+
+
                 // 基于  render() return 出来的 vnode 去调用  patch
                 // vnode 是 element ，将 element 处理 挂载出来 ，进行 mounElement 处理
         
