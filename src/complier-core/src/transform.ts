@@ -2,10 +2,12 @@ import { NodeTypes } from "./ast";
 import { TO_DISPLAY_STRING, helperMapName } from "./runtimeHelpers";
 
 /**
- * 
+ * transform 的主要目的就是对 ast 做增删 改查，最终 交给 generateCode
  * @param root 
  *  1、遍历 深度优先搜索 traverseNode
  *  2、修改 text的 content
+ * 
+ * 
  */
 export function transform(root, options:any = {}) {
     const context = creatTransformContext(root, options);
@@ -22,7 +24,7 @@ export function transform(root, options:any = {}) {
 function creatTransformContext(root: any, options: any) {
     const context = {
         root,
-        nodeTransforms:options.nodeTransforms || [],
+        nodeTransforms: options.nodeTransforms || [],
         helpers: new Map(),
         helper(key){
             context.helpers.set(key, 1)
@@ -33,15 +35,27 @@ function creatTransformContext(root: any, options: any) {
 
 
 function createRootCodegen(root: any) {
-    root.codegenNode = root.children[0];
+    const child = root.children[0]
+    if(child.type === NodeTypes.ELEMENT){
+        root.codegenNode = child.codegenNode;
+    } else{
+        root.codegenNode = child;
+    }
+
+    
+    
 }
 
 function traverseNode(node: any, context: any) {
 
-    const nodeTransforms = context.nodeTransforms
+    const nodeTransforms = context.nodeTransforms;
+    const exitFuns:any = []
     for (let j = 0; j < nodeTransforms.length; j++) {
         const transform = nodeTransforms[j];
-        transform(node);
+        const onExit = transform(node, context);
+        if(onExit){
+            exitFuns.push(onExit)
+        }
         
     }
     // if (node.type === NodeTypes.TEXT) {
@@ -66,12 +80,19 @@ function traverseNode(node: any, context: any) {
             break;
     }
 
+
+    // 在退出的时候再次重新执行 exitFun
+    let i = exitFuns.length
+    while(i--){
+        exitFuns[i]()
+    }
+
     
 }
 
 function traverseChildren(node: any, context: any) {
     const children = node.children
-    if (children) {
+    if (children.length) {
         for (let i = 0; i < children.length; i++) {
             const node = children[i];
 

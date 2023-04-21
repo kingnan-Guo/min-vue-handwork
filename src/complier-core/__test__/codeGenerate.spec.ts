@@ -3,6 +3,8 @@ import { NodeTypes } from "../src/ast";
 import { transform } from "../src/transform";
 import { generate } from "../src/codegen";
 import { transformExpression } from "../src/transforms/transformExpression";
+import { transformElement } from "../src/transforms/transformElement";
+import { transformText } from "../src/transforms/transformText";
 
 
 
@@ -38,5 +40,32 @@ describe("code Generate ", () => {
         expect(code).toMatchSnapshot()
     })
 
+    it("element", () => {
+        const ast = baseParse("<div></div>")
+        
+        transform(ast, {
+            nodeTransforms: [transformElement]
+        });
+        console.log("ast ==",ast);
+        const { code } = generate(ast)
+        // 快照测试 ：给code 拍照后续对比 出bug
+        expect(code).toMatchSnapshot()
+    })
 
+
+    it("element-all", () => {
+        const ast = baseParse("<div>king-{{message}}</div>")
+        
+        transform(ast, {
+            // 有顺序  先将 更改节点 然后再 更改 text
+            nodeTransforms: [transformExpression,transformElement, transformText]
+        });
+        console.log("ast ==",ast);
+        const { code } = generate(ast)
+        // 快照测试 ：给code 拍照后续对比 出bug
+        expect(code).toMatchSnapshot()
+    })
+
+
+    
 });

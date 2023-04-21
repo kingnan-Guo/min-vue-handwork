@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`code Generate  element 1`] = `
+"const { creatElementVNode: _creatElementVNode } = Vue
+return function render(_ctx, _cache){return _creatElementVNode('div', null, null)}"
+`;
+
+exports[`code Generate  element-all 1`] = `
+"const { toDisplayString: _toDisplayString, creatElementVNode: _creatElementVNode } = Vue
+return function render(_ctx, _cache){return _creatElementVNode('div', null, 'king-' + _toDisplayString(_ctx.message))}"
+`;
+
 exports[`code Generate  interpolation 1`] = `
 "const { toDisplayString: _toDisplayString } = Vue
 return function render(_ctx, _cache){return _toDisplayString(_ctx.message)}"
