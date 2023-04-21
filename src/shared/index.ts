@@ -1,3 +1,5 @@
+export * from "./toDisplayString"
+
 // 将两个或多个对象的属性合并到一起
 export const extend = Object.assign;
 
