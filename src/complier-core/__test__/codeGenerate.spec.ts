@@ -66,6 +66,17 @@ describe("code Generate ", () => {
         expect(code).toMatchSnapshot()
     })
 
-
+    it("element-all-test", () => {
+        const ast = baseParse("<div><span>guo</span> king-{{message}}</div>")
+        
+        transform(ast, {
+            // 有顺序  先将 更改节点 然后再 更改 text
+            nodeTransforms: [transformExpression,transformElement, transformText]
+        });
+        console.log("ast ==",ast);
+        const { code } = generate(ast)
+        // 快照测试 ：给code 拍照后续对比 出bug
+        expect(code).toMatchSnapshot()
+    })
     
 });

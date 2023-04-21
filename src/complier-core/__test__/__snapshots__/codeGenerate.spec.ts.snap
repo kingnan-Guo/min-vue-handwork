@@ -10,6 +10,11 @@ exports[`code Generate  element-all 1`] = `
 return function render(_ctx, _cache){return _creatElementVNode('div', null, 'king-' + _toDisplayString(_ctx.message))}"
 `;
 
+exports[`code Generate  element-all-test 1`] = `
+"const { creatElementVNode: _creatElementVNode, toDisplayString: _toDisplayString } = Vue
+return function render(_ctx, _cache){return _creatElementVNode('div', null,_creatElementVNode(span, null,))}"
+`;
+
 exports[`code Generate  interpolation 1`] = `
 "const { toDisplayString: _toDisplayString } = Vue
 return function render(_ctx, _cache){return _toDisplayString(_ctx.message)}"
