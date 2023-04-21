@@ -66,12 +66,14 @@ describe("code Generate ", () => {
         expect(code).toMatchSnapshot()
     })
 
+
+    // 错误案例
     it("element-all-test", () => {
         const ast = baseParse("<div><span>guo</span> king-{{message}}</div>")
         
         transform(ast, {
             // 有顺序  先将 更改节点 然后再 更改 text
-            nodeTransforms: [transformExpression,transformElement, transformText]
+            nodeTransforms: [transformExpression, transformElement, transformExpression, transformElement, transformText]
         });
         console.log("ast ==",ast);
         const { code } = generate(ast)
