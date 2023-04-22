@@ -27,15 +27,15 @@ function compileFunction(template) {
     const { code } = baseCompile(template);
     console.log("code =", code);
     
-    // var code2 = `const { toDisplayString: _toDisplayString, createElementVNode: _createElementVNode } = Vue;
-    // return function render(_ctx, _cache){
-    //     console.log("_ctx =", _ctx, "_cache ==", _cache);
-    //     return _createElementVNode('div', null, 'king-' + _toDisplayString(_ctx.message) +  '- ' + _toDisplayString(_ctx.count))
-    // }`
+    var code2 = `const { toDisplayString: _toDisplayString, createElementVNode: _createElementVNode } = Vue;
+    return function render(_ctx, _cache){
+        console.log("_ctx =", _ctx, "_cache ==", _cache);
+        return _createElementVNode('div', null, 'king-' + _toDisplayString(_ctx.message) +  '- ' + _toDisplayString(_ctx.count))
+    }`
 
 
-    // 文档见 means/means.md
-    const render = new Function("Vue", code)(runtimeDom);
+    // 这段没看懂
+    const render = new Function("Vue", code2)(runtimeDom);
     return render
     // const render = renderFunction()
     // function renderFunction(Vue) {
